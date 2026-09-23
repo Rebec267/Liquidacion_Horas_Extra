@@ -5,41 +5,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Banco Horizonte · Liquidación de Horas Extra</title>
 <style>
-  body { font-family: "Segoe UI", Arial, sans-serif; background: #F1F4F8;
-         color: #1F2937; margin: 0; }
-  header { background: #1F3A5F; color: #fff; padding: 18px 24px;
-           border-bottom: 3px solid #C9A227; }
-  header h1 { margin: 0; font-size: 20px; }
-  header p { margin: 4px 0 0; color: #C9D4E3; font-size: 13px; }
-  main { max-width: 640px; margin: 24px auto; background: #fff;
-         padding: 24px; border-radius: 8px; }
-  label { display: block; margin: 12px 0 4px; font-weight: bold; }
-  input[type=file], input[type=text] { width: 100%; padding: 8px;
-    border: 1px solid #CBD5E1; border-radius: 4px; }
-  button { background: #2456A6; color: #fff; border: 0; border-radius: 4px;
-    padding: 12px 28px; font-size: 16px; font-weight: bold; cursor: pointer;
-    margin-top: 16px; }
-  button:hover { background: #1B447F; }
-  .error { background: #FADBD8; border: 1px solid #E6A19E; padding: 10px;
-    border-radius: 4px; margin-bottom: 12px; }
+  :root {
+    --azul: #1F3A5F; --rojo: #B91C1C; --rojo-oscuro: #991B1B;
+    --fondo: #F1F4F8; --tarjeta: #FFFFFF; --texto: #1F2937;
+    --suave: #5B6472; --borde: #E2E8F0; --sombra: 0 2px 10px rgba(31,58,95,.08);
+  }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Roboto, Arial, sans-serif;
+         background: var(--fondo); color: var(--texto); margin: 0; }
+  header { background: linear-gradient(135deg, #162942, var(--azul));
+           color: #fff; padding: 26px 24px 22px;
+           border-bottom: 4px solid var(--rojo); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  header h1 { margin: 0; font-size: 22px; letter-spacing: .2px; }
+  header p { margin: 6px 0 0; color: #C9D4E3; font-size: 13px; }
+  .insignia { display: inline-block; background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.25); font-size: 12px;
+    padding: 3px 10px; border-radius: 999px; margin-top: 10px; }
+  main .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde);
+    border-radius: 12px; box-shadow: var(--sombra); padding: 26px;
+    max-width: 640px; margin: 28px auto; }
+  .tarjeta h2 { color: var(--azul); font-size: 17px; margin: 0 0 6px; }
+  .ayuda { color: var(--suave); font-size: 13px; margin: 0 0 14px; }
+  label { display: block; margin: 16px 0 6px; font-weight: 600; font-size: 14px; }
+  .campo { border: 1px solid var(--borde); border-radius: 8px;
+    background: #F8FAFC; padding: 10px; transition: border-color .15s; }
+  .campo:focus-within { border-color: var(--azul); }
+  input[type=file] { width: 100%; font-size: 14px; }
+  input[type=text] { width: 120px; padding: 9px 10px; font-size: 15px;
+    border: 1px solid var(--borde); border-radius: 8px; }
+  button { display: block; width: 100%; background: var(--rojo); color: #fff;
+    border: 0; border-radius: 8px; padding: 14px; font-size: 17px;
+    font-weight: 700; letter-spacing: 1px; cursor: pointer; margin-top: 22px;
+    box-shadow: 0 3px 8px rgba(185,28,28,.30); }
+  button:hover { background: var(--rojo-oscuro); }
+  .error { background: #FDECEC; border: 1px solid #E6A19E; color: #7F1D1D;
+    padding: 12px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; }
+  footer { text-align: center; color: var(--suave); font-size: 12px;
+    padding: 18px; }
+  @media (max-width: 560px) {
+    header h1 { font-size: 18px; }
+    main .tarjeta { margin: 16px auto; padding: 18px; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>Banco Horizonte · Liquidación de Horas Extra</h1>
-  <p>Recursos Humanos · Costa Rica — versión web</p>
+  <div class="wrap">
+    <h1>Banco Horizonte · Liquidación de Horas Extra</h1>
+    <p>Recursos Humanos · Costa Rica — versión web</p>
+    <span class="insignia">Uso interno · Planilla mensual</span>
+  </div>
 </header>
-<main>
-  {% if error %}<div class="error">{{ error }}</div>{% endif %}
-  <form action="/liquidar" method="post" enctype="multipart/form-data">
-    <label for="maestro">Maestro de empleados (.xlsx, hoja Empleados)</label>
-    <input id="maestro" name="maestro" type="file" accept=".xlsx,.xls" required>
-    <label for="registros">Registros de horas extra (.xlsx, hoja Registros)</label>
-    <input id="registros" name="registros" type="file" accept=".xlsx,.xls" required>
-    <label for="tope">Tope de horas extra al mes</label>
-    <input id="tope" name="tope" type="text" value="40" required>
-    <button type="submit">LIQUIDAR</button>
-  </form>
+<main class="wrap">
+  <div class="tarjeta">
+    <h2>Cargar insumos</h2>
+    <p class="ayuda">Suba los dos archivos Excel y pulse LIQUIDAR. No se guarda nada en el servidor.</p>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form action="/liquidar" method="post" enctype="multipart/form-data">
+      <label for="maestro">Maestro de empleados (.xlsx, hoja Empleados)</label>
+      <div class="campo"><input id="maestro" name="maestro" type="file" accept=".xlsx,.xls" required></div>
+      <label for="registros">Registros de horas extra (.xlsx, hoja Registros)</label>
+      <div class="campo"><input id="registros" name="registros" type="file" accept=".xlsx,.xls" required></div>
+      <label for="tope">Tope de horas extra al mes</label>
+      <input id="tope" name="tope" type="text" value="40" required>
+      <button type="submit">LIQUIDAR</button>
+    </form>
+  </div>
 </main>
+<footer>Sistema administrativo · Banco Horizonte</footer>
 </body>
 </html>
