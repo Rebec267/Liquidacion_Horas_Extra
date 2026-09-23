@@ -1,0 +1,9 @@
+# Build y empaquetado
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+
+# Salidas generadas por la app
+reportes/
