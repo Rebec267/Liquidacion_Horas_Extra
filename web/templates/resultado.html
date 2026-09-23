@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultado · Liquidación de Horas Extra</title>
+<style>
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #F1F4F8;
+         color: #1F2937; margin: 0; }
+  header { background: #1F3A5F; color: #fff; padding: 18px 24px;
+           border-bottom: 3px solid #C9A227; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; color: #C9D4E3; font-size: 13px; }
+  main { max-width: 1000px; margin: 24px auto; padding: 0 16px 32px; }
+  .card { background: #fff; padding: 16px 20px; border-radius: 8px;
+          margin-bottom: 16px; }
+  .card h2 { color: #1F3A5F; font-size: 16px; margin: 0 0 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th { background: #1F3A5F; color: #fff; padding: 8px; text-align: left; }
+  td { border-bottom: 1px solid #E5E7EB; padding: 7px 8px; }
+  tr:nth-child(even) td { background: #F2F5F9; }
+  tr.excede td { background: #FADBD8; }
+  .total { font-size: 18px; font-weight: bold; }
+  .descargas a { display: inline-block; background: #2456A6; color: #fff;
+    text-decoration: none; padding: 10px 20px; border-radius: 4px;
+    font-weight: bold; margin-right: 10px; }
+  .descargas a:hover { background: #1B447F; }
+  .volver { display: inline-block; margin-top: 12px; color: #2456A6; }
+  select { padding: 6px; border: 1px solid #CBD5E1; border-radius: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Banco Horizonte · Liquidación de Horas Extra</h1>
+  <p>Mes liquidado: {{ mes }} · Tope: {{ tope }} h</p>
+</header>
+<main>
+  <div class="card descargas">
+    <h2>Descargas</h2>
+    <a href="{{ xlsx_uri }}" download="Liquidacion_Horas_Extra.xlsx">Descargar Excel</a>
+    <a href="{{ pdf_uri }}" download="Reporte_Horas_Extra.pdf">Descargar PDF</a>
+  </div>
+  <div class="card">
+    <h2>Resumen por estado</h2>
+    <table>
+      <tr><th>Estado</th><th>Registros</th></tr>
+      {% for e, n in estados %}<tr><td>{{ e }}</td><td>{{ n }}</td></tr>{% endfor %}
+    </table>
+    <p class="total">Horas válidas: {{ horas_total }} (diurnas {{ horas_d }}, nocturnas {{ horas_n }})</p>
+    <p class="total">Monto total a pagar: {{ monto_total }}</p>
+  </div>
+  <div class="card">
+    <h2>Monto y horas por departamento</h2>
+    <table>
+      <tr><th>Departamento</th><th>Registros</th><th>Horas</th><th>Monto</th></tr>
+      {% for f in filas_dep %}
+      <tr><td>{{ f["Departamento"] }}</td><td>{{ f["Registros"] }}</td>
+          <td>{{ fmt_horas(f["Horas"]) }}</td><td>{{ fmt_crc(f["Monto"]) }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h2>Top 5 empleados con más horas válidas</h2>
+    <table>
+      <tr><th>Cédula</th><th>Nombre</th><th>Horas</th><th>Monto</th></tr>
+      {% for f in top5 %}
+      <tr><td>{{ f["Cedula"] }}</td><td>{{ f["Nombre"] }}</td>
+          <td>{{ fmt_horas(f["Horas_Totales"]) }}</td><td>{{ fmt_crc(f["Monto"]) }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h2>Liquidación por empleado
+      <select id="filtro" onchange="filtrar()">
+        <option value="Todos">Todos</option>
+        {% for d in deptos %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+      </select>
+    </h2>
+    <table id="tabla-emp">
+      <tr><th>Cédula</th><th>Nombre</th><th>Departamento</th><th>H. diurnas</th>
+          <th>H. nocturnas</th><th>H. totales</th><th>Monto</th><th>Excede tope</th></tr>
+      {% for f in filas_emp %}
+      <tr data-depto="{{ f['Departamento'] }}" class="{% if f['Excede_Tope'] == 'Sí' %}excede{% endif %}">
+        <td>{{ f["Cedula"] }}</td><td>{{ f["Nombre"] }}</td><td>{{ f["Departamento"] }}</td>
+        <td>{{ fmt_horas(f["Horas_Diurnas"]) }}</td><td>{{ fmt_horas(f["Horas_Nocturnas"]) }}</td>
+        <td>{{ fmt_horas(f["Horas_Totales"]) }}</td><td>{{ fmt_crc(f["Monto"]) }}</td>
+        <td>{{ f["Excede_Tope"] }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="card">
+    <h2>Alertas (registros no válidos)</h2>
+    <table>
+      <tr><th>ID_Registro</th><th>Cédula</th><th>Fecha</th><th>Horas</th><th>Tipo</th><th>Estado</th></tr>
+      {% for f in filas_ale %}
+      <tr><td>{{ f["ID_Registro"] }}</td><td>{{ f["Cedula"] }}</td><td>{{ f["Fecha_Norm"] }}</td>
+          <td>{{ f["Horas"] }}</td><td>{{ f["Tipo"] }}</td><td>{{ f["Estado"] }}</td></tr>
+      {% endfor %}
+    </table>
+    <h2>Exceden el tope (se pagan igual)</h2>
+    <table>
+      <tr><th>Cédula</th><th>Nombre</th><th>Departamento</th><th>Horas</th></tr>
+      {% for _, e in exceden.iterrows() %}
+      <tr><td>{{ e["Cedula"] }}</td><td>{{ e["Nombre"] }}</td>
+          <td>{{ e["Departamento"] }}</td><td>{{ fmt_horas(e["Horas_Totales"]) }}</td></tr>
+      {% endfor %}
+    </table>
+  </div>
+  <a class="volver" href="/">← Nueva liquidación</a>
+</main>
+<script>
+function filtrar() {
+  var d = document.getElementById("filtro").value;
+  document.querySelectorAll("#tabla-emp tr[data-depto]").forEach(function (tr) {
+    tr.style.display = (d === "Todos" || tr.dataset.depto === d) ? "" : "none";
+  });
+}
+</script>
+</body>
+</html>

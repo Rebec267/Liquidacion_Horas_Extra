@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banco Horizonte · Liquidación de Horas Extra</title>
+<style>
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #F1F4F8;
+         color: #1F2937; margin: 0; }
+  header { background: #1F3A5F; color: #fff; padding: 18px 24px;
+           border-bottom: 3px solid #C9A227; }
+  header h1 { margin: 0; font-size: 20px; }
+  header p { margin: 4px 0 0; color: #C9D4E3; font-size: 13px; }
+  main { max-width: 640px; margin: 24px auto; background: #fff;
+         padding: 24px; border-radius: 8px; }
+  label { display: block; margin: 12px 0 4px; font-weight: bold; }
+  input[type=file], input[type=text] { width: 100%; padding: 8px;
+    border: 1px solid #CBD5E1; border-radius: 4px; }
+  button { background: #2456A6; color: #fff; border: 0; border-radius: 4px;
+    padding: 12px 28px; font-size: 16px; font-weight: bold; cursor: pointer;
+    margin-top: 16px; }
+  button:hover { background: #1B447F; }
+  .error { background: #FADBD8; border: 1px solid #E6A19E; padding: 10px;
+    border-radius: 4px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Banco Horizonte · Liquidación de Horas Extra</h1>
+  <p>Recursos Humanos · Costa Rica — versión web</p>
+</header>
+<main>
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form action="/liquidar" method="post" enctype="multipart/form-data">
+    <label for="maestro">Maestro de empleados (.xlsx, hoja Empleados)</label>
+    <input id="maestro" name="maestro" type="file" accept=".xlsx,.xls" required>
+    <label for="registros">Registros de horas extra (.xlsx, hoja Registros)</label>
+    <input id="registros" name="registros" type="file" accept=".xlsx,.xls" required>
+    <label for="tope">Tope de horas extra al mes</label>
+    <input id="tope" name="tope" type="text" value="40" required>
+    <button type="submit">LIQUIDAR</button>
+  </form>
+</main>
+</body>
+</html>
